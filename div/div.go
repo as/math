@@ -3,7 +3,7 @@
 // can be generalized to other operations based on equations: a = bq + r
 package div
 
-// Invert returns coefficents a, k, r to compute n/d = a*x+k >> r.
+// Invert returns coefficents a, k, r to compute n/d = a*n+k >> r.
 // n, d must be [1, 2**31). For best results, the return values
 // should be reused for the given  d.
 func Invert31n(d uint64) (a, k, r uint64) {
