@@ -3,26 +3,52 @@
 // can be generalized to other operations based on equations: a = bq + r
 package div
 
-// Invert returns coefficents a, k, r to compute n/d = a*n+k >> r.
-// n, d must be [1, 2**31). For best results, the return values
-// should be reused for the given  d.
-func Invert31n(d uint64) (a, k, r uint64) {
-	const (
-		order = 32
-		z     = 1 << order
-		c     = z >> 1
-	)
-	nbits := order + log2(d)
-	k = 1 << nbits
-	a = k / d
-	return a, c / d * (k - a*d), nbits
+// Invert returns d, r, k to compute integer division n/e via the
+// product multiply-add-shift operation: uintN(a*d+r) >> k.
+//
+// The value of e must be in the domain [1, 2**n) and n > 32 is undefined.
+//
+// Notationally, uintN is a type conversion of the intermediate result to a
+// type exactly n*n bits wide before the shift operation:
+//
+//	n	N	type
+//	8	16	uint16
+//	16	32	uint32
+//	32	64	uint64
+//
+func Invertn(e, n uint64) (d, r, k uint64) {
+	ord := uint64(1 << (n - 1))
+	k = n + log2(e)
+	r = 1 << k
+	d = r / e
+	return d, ord / e * (r - d*e), k
+}
+
+// Invert returns d, r, k to compute integer division n/e via the
+// product multiply-add-shift operation: (a*d+r) >> k. The values
+// of e must be in the domain [1, 2**31). For any performance
+// advantage, the return values should be reused for the given e.
+func Invert31n(e uint64) (d, r, k uint64) {
+	const exp = 32
+	const ord = 1 << (exp - 1)
+	k = exp + log2(e)
+	r = 1 << k
+	d = r / e
+	return d, ord / e * (r - d*e), k
+}
+
+// mod is an example function; really shouldn't be using
+// it since the function call overhead defeats the purpose
+func mod(n, e uint64) uint64 {
+	d, r, k := Invert31n(e)
+	return (n*d + r) >> k
 }
 
 // div is an example function; really shouldn't be using
 // it since the function call overhead defeats the purpose
-func div(n, d uint64) uint64 {
-	a, c, s := Invert31n(d)
-	return (a*n + c) >> s
+func div(n, e uint64) uint64 {
+	d, r, k := Invert31n(e)
+	return (n*d + r) >> k
 }
 
 // avoids dependency on math/bits for older go releases
