@@ -18,6 +18,23 @@ var tab = [65536]struct {
 	}
 	
 	// anything higher takes a noticable amount of time
+	t.Run("Mod", func(t *testing.T) {
+		const lim = 1 << 14
+		right, total := 0, 0
+		for a := uint64(1); a < lim; a++ {
+			for b := uint64(1); b < lim; b++ {
+				total++
+				if have, want := mod(a, b), a%b; have == want {
+					right++
+				} else {
+					t.Fatalf("bad modulus: %d/%d: %d,%d acc(%0.3f)\n", a, b, have, want, float64(have)/float64(want))
+				}
+			}
+		}
+		t.Logf("%d divisions (%d correct)", total, right)
+	})
+	
+	// anything higher takes a noticable amount of time
 	t.Run("Slow", func(t *testing.T) {
 		const lim = 1 << 14
 		right, total := 0, 0
