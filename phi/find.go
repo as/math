@@ -13,7 +13,7 @@ func Find(N *big.Int) *big.Int {
 	g := one
 	E := guess(N, g, new(big.Int))
 	E0 := new(big.Int).Exp(two, E, N)
-	E0 = E0.ModInverse(E0, N)
+	E0.ModInverse(E0, N)
 	L := log2(N)
 	i := int64(0)
 	for !smooth2(E0) {
